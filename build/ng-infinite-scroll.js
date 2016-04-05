@@ -1,4 +1,4 @@
-/* ng-infinite-scroll - v1.2.1 - 2016-02-09 */
+/* ng-infinite-scroll - v1.2.1 - 2016-04-04 */
 var mod;
 
 mod = angular.module('infinite-scroll', []);
@@ -13,6 +13,7 @@ mod.directive('infiniteScroll', [
         infiniteScrollContainer: '=',
         infiniteScrollDistance: '=',
         infiniteScrollDisabled: '=',
+        infiniteScrollInverse: '=',
         infiniteScrollUseDocumentBottom: '=',
         infiniteScrollListenForEvent: '@'
       },
@@ -50,22 +51,37 @@ mod.directive('infiniteScroll', [
           }
         };
         handler = function() {
-          var containerBottom, containerTopOffset, elementBottom, remaining, shouldScroll;
+          var containerEdge, containerTopOffset, elementEdge, remaining, shouldScroll;
           if (container === windowElement) {
-            containerBottom = height(container) + pageYOffset(container[0].document.documentElement);
-            elementBottom = offsetTop(elem) + height(elem);
-          } else {
-            containerBottom = height(container);
-            containerTopOffset = 0;
-            if (offsetTop(container) !== void 0) {
-              containerTopOffset = offsetTop(container);
+            if (scope.infiniteScrollInverse) {
+              containerEdge = pageYOffset(container[0].document.documentElement);
+              elementEdge = offsetTop(elem);
+            } else {
+              containerEdge = height(container) + pageYOffset(container[0].document.documentElement);
+              elementEdge = offsetTop(elem) + height(elem);
             }
-            elementBottom = offsetTop(elem) - containerTopOffset + height(elem);
+          } else {
+            if (scope.infiniteScrollInverse) {
+              containerTopOffset = 0;
+              if (offsetTop(container) !== void 0) {
+                containerTopOffset = offsetTop(container);
+              }
+              containerEdge = containerTopOffset;
+              elementEdge = offsetTop(elem) - containerTopOffset;
+            } else {
+              containerEdge = height(container);
+              containerTopOffset = 0;
+              if (offsetTop(container) !== void 0) {
+                containerTopOffset = offsetTop(container);
+              }
+              elementEdge = offsetTop(elem) - containerTopOffset + height(elem);
+            }
           }
           if (useDocumentBottom) {
-            elementBottom = height((elem[0].ownerDocument || elem[0].document).documentElement);
+            elementEdge = height((elem[0].ownerDocument || elem[0].document).documentElement);
+            elementEdge = offsetTop((elem[0].ownerDocument || elem[0].document).documentElement);
           }
-          remaining = elementBottom - containerBottom;
+          remaining = scope.infiniteScrollInverse ? containerEdge - elementEdge : elementEdge - containerEdge;
           shouldScroll = remaining <= height(container) * scrollDistance + 1;
           if (shouldScroll) {
             checkWhenEnabled = true;
