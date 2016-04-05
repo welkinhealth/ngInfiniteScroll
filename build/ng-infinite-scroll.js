@@ -67,7 +67,7 @@ mod.directive('infiniteScroll', [
                 containerTopOffset = offsetTop(container);
               }
               containerEdge = containerTopOffset;
-              elementEdge = offsetTop(elem) - containerTopOffset;
+              elementEdge = offsetTop(elem);
             } else {
               containerEdge = height(container);
               containerTopOffset = 0;
