@@ -9,6 +9,7 @@ mod.directive 'infiniteScroll', ['$rootScope', '$window', '$interval', 'THROTTLE
     infiniteScrollContainer: '='
     infiniteScrollDistance: '='
     infiniteScrollDisabled: '='
+    infiniteScrollInverse: '='
     infiniteScrollUseDocumentBottom: '=',
     infiniteScrollListenForEvent: '@'
 
@@ -48,19 +49,31 @@ mod.directive 'infiniteScroll', ['$rootScope', '$window', '$interval', 'THROTTLE
     # called in order to throttle the function call.
     handler = ->
       if container == windowElement
-        containerBottom = height(container) + pageYOffset(container[0].document.documentElement)
-        elementBottom = offsetTop(elem) + height(elem)
+        if scope.infiniteScrollInverse
+          containerEdge = pageYOffset(container[0].document.documentElement)
+          elementEdge = offsetTop(elem)
+        else
+          containerEdge = height(container) + pageYOffset(container[0].document.documentElement)
+          elementEdge = offsetTop(elem) + height(elem)
       else
-        containerBottom = height(container)
-        containerTopOffset = 0
-        if offsetTop(container) != undefined
-          containerTopOffset = offsetTop(container)
-        elementBottom = offsetTop(elem) - containerTopOffset + height(elem)
+        if scope.infiniteScrollInverse
+          containerTopOffset = 0
+          if offsetTop(container) != undefined
+            containerTopOffset = offsetTop(container)
+          containerEdge = containerTopOffset
+          elementEdge = offsetTop(elem) - containerTopOffset
+        else
+          containerEdge = height(container)
+          containerTopOffset = 0
+          if offsetTop(container) != undefined
+            containerTopOffset = offsetTop(container)
+          elementEdge = offsetTop(elem) - containerTopOffset + height(elem)
 
       if(useDocumentBottom)
-        elementBottom = height((elem[0].ownerDocument || elem[0].document).documentElement)
+        elementEdge = height((elem[0].ownerDocument || elem[0].document).documentElement)
+        elementEdge = offsetTop((elem[0].ownerDocument || elem[0].document).documentElement)
 
-      remaining = elementBottom - containerBottom
+      remaining = if scope.infiniteScrollInverse then containerEdge - elementEdge else elementEdge - containerEdge
       shouldScroll = remaining <= height(container) * scrollDistance + 1
 
       if shouldScroll
