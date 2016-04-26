@@ -2,8 +2,8 @@ mod = angular.module('infinite-scroll', [])
 
 mod.value('THROTTLE_MILLISECONDS', null)
 
-mod.directive 'infiniteScroll', ['$rootScope', '$window', '$interval', 'THROTTLE_MILLISECONDS', \
-                                  ($rootScope, $window, $interval, THROTTLE_MILLISECONDS) ->
+mod.directive 'infiniteScroll', ['$rootScope', '$window', '$interval', 'THROTTLE_MILLISECONDS', '$log',\
+                                  ($rootScope, $window, $interval, THROTTLE_MILLISECONDS, $log) ->
   scope:
     infiniteScroll: '&'
     infiniteScrollContainer: '='
@@ -28,7 +28,14 @@ mod.directive 'infiniteScroll', ['$rootScope', '$window', '$interval', 'THROTTLE
     height = (elem) ->
       elem = elem[0] or elem
 
-      if isNaN(elem.offsetHeight) then elem.document.documentElement.clientHeight else elem.offsetHeight
+      oH = elem.offsetHeight
+      if isNaN(oH)
+        if !elem.document
+          $log.error(elem.tagName)
+
+        elem.document.documentElement.clientHeight
+      else
+        elem.offsetHeight
 
     offsetTop = (elem) ->
       if not elem[0].getBoundingClientRect or elem.css('none')

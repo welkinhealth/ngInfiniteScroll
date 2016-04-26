@@ -1,4 +1,4 @@
-/* ng-infinite-scroll - v1.2.1 - 2016-04-04 */
+/* ng-infinite-scroll - v1.2.1 - 2016-04-26 */
 var mod;
 
 mod = angular.module('infinite-scroll', []);
@@ -6,7 +6,7 @@ mod = angular.module('infinite-scroll', []);
 mod.value('THROTTLE_MILLISECONDS', null);
 
 mod.directive('infiniteScroll', [
-  '$rootScope', '$window', '$interval', 'THROTTLE_MILLISECONDS', function($rootScope, $window, $interval, THROTTLE_MILLISECONDS) {
+  '$rootScope', '$window', '$interval', 'THROTTLE_MILLISECONDS', '$log', function($rootScope, $window, $interval, THROTTLE_MILLISECONDS, $log) {
     return {
       scope: {
         infiniteScroll: '&',
@@ -29,8 +29,13 @@ mod.directive('infiniteScroll', [
         unregisterEventListener = null;
         checkInterval = false;
         height = function(elem) {
+          var oH;
           elem = elem[0] || elem;
-          if (isNaN(elem.offsetHeight)) {
+          oH = elem.offsetHeight;
+          if (isNaN(oH)) {
+            if (!elem.document) {
+              $log.error(elem.tagName);
+            }
             return elem.document.documentElement.clientHeight;
           } else {
             return elem.offsetHeight;
